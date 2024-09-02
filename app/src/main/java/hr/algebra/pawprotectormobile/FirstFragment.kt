@@ -7,15 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import hr.algebra.pawprotectormobile.databinding.FragmentFirstBinding
 import hr.algebra.pawprotectormobile.model.Dog
-import hr.algebra.pawprotectormobile.model.TokenResponse
 import hr.algebra.pawprotectormobile.network.ApiService
 import hr.algebra.pawprotectormobile.ui.DogAdapter
+import hr.algebra.pawprotectormobile.ui.SharedViewModel
 import hr.algebra.pawprotectormobile.utils.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,44 +23,56 @@ import retrofit2.HttpException
 import java.io.IOException
 
 class FirstFragment : Fragment() {
+    private lateinit var viewModel: SharedViewModel
+
     private var _binding: FragmentFirstBinding? = null
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: DogAdapter
     private val binding get() = _binding!!
-    private var dogList: List<Dog> = listOf()
+    private lateinit var adapter: DogAdapter
+    private var dogList: MutableList<Dog> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
-        recyclerView = binding.recyclerViewDogs
-        recyclerView.layoutManager = LinearLayoutManager(context)        // Initialize the adapter
-        adapter = DogAdapter(dogList)
-        recyclerView.adapter = adapter
-
-        fetchTokenAndDogs()
-
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize RecyclerView
+        binding.recyclerViewDogs.layoutManager = LinearLayoutManager(context)
+
+        // Initialize adapter with a mutable list and click listener
+        adapter = DogAdapter(dogList, object : DogAdapter.OnItemClickListener {
+            override fun onItemClick(dog: Dog) {
+                openBreederFragment(dog.breedName)
+            }
+        })
+        binding.recyclerViewDogs.adapter = adapter
+
+        fetchTokenAndDogs() // Fetch data after initializing the adapter
+
+        // Setup button click listener
+        binding.buttonFirst.setOnClickListener {
+            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+        }
+    }
+
     private fun fetchTokenAndDogs() {
-        // Launch a coroutine in the IO context
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // Fetch the token asynchronously
                 val tokenResponse = RetrofitInstance.api.getToken("c9bb9f03-0134-493d-8918-82e450d2ec66")
 
                 if (tokenResponse.isSuccessful) {
-                    // Directly extract the token from the response body
                     val token = tokenResponse.body()?.string()?.trim()
+                    viewModel.sharedString.postValue(token)
 
                     if (token != null && token.isNotEmpty()) {
-                        // Log the token (for debugging purposes, consider removing this in production)
                         Log.d("FetchTokenAndDogs", "Token: $token")
-
-                        // Fetch the dogs asynchronously with the token
-                      fetchDogs(token)
+                        fetchDogs(token)
                     } else {
                         showToast("Token is null or empty")
                     }
@@ -77,51 +89,52 @@ class FirstFragment : Fragment() {
         }
     }
 
-
-
     private suspend fun fetchDogs(token: String) {
         try {
-            // Fetch the dogs asynchronously
             val dogsResponse = RetrofitInstance.api.getAllDogs("Bearer $token")
             if (dogsResponse.isSuccessful) {
                 val dogs = dogsResponse.body() ?: emptyList()
-                dogList = dogs
+                Log.d("FetchDogs", "Fetched dogs: $dogs")
+                dogList.clear()
+                dogList.addAll(dogs)
                 updateRecyclerView()
             } else {
+                Log.e("FetchDogs", "Failed to fetch dogs: ${dogsResponse.code()}")
                 showToast("Failed to fetch dogs: ${dogsResponse.code()}")
             }
         } catch (e: IOException) {
+            Log.e("FetchDogs", "Network error: ${e.localizedMessage}")
             showToast("Network error: ${e.localizedMessage}")
         } catch (e: HttpException) {
+            Log.e("FetchDogs", "HTTP error: ${e.localizedMessage}")
             showToast("HTTP error: ${e.localizedMessage}")
+        } catch (e: Exception) {
+            Log.e("FetchDogs", "Unexpected error: ${e.localizedMessage}")
+            showToast("Unexpected error: ${e.localizedMessage}")
         }
     }
 
     private fun updateRecyclerView() {
-        // Switch to the main thread to update the UI
         lifecycleScope.launch(Dispatchers.Main) {
-            adapter = DogAdapter(dogList)
-            recyclerView.adapter = adapter
+            adapter.notifyDataSetChanged() // Notify adapter of data changes
         }
     }
 
     private fun showToast(message: String) {
-        // Show a toast message on the main thread
         lifecycleScope.launch(Dispatchers.Main) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
 
+    private fun openBreederFragment(breedName: String) {
+        val bundle = Bundle().apply {
+            putString("breed_name", breedName)
+        }
+        findNavController().navigate(R.id.action_FirstFragment_to_BreederFragment, bundle)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.buttonFirst.setOnClickListener {
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
-        }
     }
 }

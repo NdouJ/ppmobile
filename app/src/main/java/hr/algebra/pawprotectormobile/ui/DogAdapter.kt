@@ -8,9 +8,25 @@ import com.bumptech.glide.request.RequestOptions
 import hr.algebra.pawprotectormobile.databinding.ItemDogBinding
 import hr.algebra.pawprotectormobile.model.Dog
 
-class DogAdapter(private val dogList: List<Dog>) : RecyclerView.Adapter<DogAdapter.ViewHolder>() {
+class DogAdapter(
+    private val dogList: List<Dog>,
+    private val itemClickListener: OnItemClickListener
+) : RecyclerView.Adapter<DogAdapter.ViewHolder>() {
+
+    interface OnItemClickListener {
+        fun onItemClick(dog: Dog)
+    }
 
     inner class ViewHolder(private val binding: ItemDogBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val clickedDog = dogList[position]
+                    itemClickListener.onItemClick(clickedDog)
+                }
+            }
+        }
 
         fun bind(dog: Dog) {
             binding.dog = dog

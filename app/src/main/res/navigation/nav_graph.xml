@@ -11,18 +11,34 @@
         android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first">
 
+        <!-- Define an action from FirstFragment to SecondFragment -->
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
             app:destination="@id/SecondFragment" />
+
+        <!-- Define an action from FirstFragment to BreederFragment -->
+        <action
+            android:id="@+id/action_FirstFragment_to_BreederFragment"
+            app:destination="@id/BreederFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/SecondFragment"
         android:name="hr.algebra.pawprotectormobile.SecondFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_second">
 
+        <!-- Define an action from SecondFragment to FirstFragment -->
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/BreederFragment"
+        android:name="hr.algebra.pawprotectormobile.BreederFragment"
+        android:label="@string/breeder_fragmnet"
+        tools:layout="@layout/fragmnent_breeder">
+        <!-- No additional actions needed in BreederFragment for this setup -->
     </fragment>
 </navigation>
