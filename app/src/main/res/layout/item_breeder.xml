@@ -10,9 +10,11 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@drawable/border_background">
 
-        <TextView
+
+    <TextView
             android:id="@+id/breederId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -2,26 +2,21 @@
     <string name="app_name">PawProtectorMobile</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="first_fragment_label">Dogs</string>
+    <string name="second_fragment_label">About us</string>
+    <string name="next">About us</string>
+    <string name="previous">Dogs</string>
     <string name="dog_image">Description of dog image</string>
     <string name="lorem_ipsum">
-
     Dobrodošli na našu stranicu! 🎉 Mi smo tim zaljubljenika u pse 🐶 koji se brine da vaša potraga za savršenim ljubimcem bude sigurna i bez stresa.
-
     Naša misija je jednostavna: provjeravamo registraciju uzgajivača pasa 🐕 u Hrvatskom kinološkom savezu (HKS) kako bismo osigurali da su uzgajivači s kojima surađujete pouzdani i da su njihovi psi uzgojeni u skladu s najvišim standardima. 🏆
-
     Znamo koliko je važno da vaš novi četveronožni prijatelj 🐾 dođe iz sigurnog i odgovornog uzgoja. Zato smo tu da vam pomognemo u svakom koraku! 💌
-
    Ako imate bilo kakvih pitanja ili trebate savjet, slobodno nam se obratite. 😊 Rado ćemo vam pomoći!
-
     Hvala vam što nam vjerujete u pronalasku najboljeg prijatelja za vas i vašu obitelj! ❤️
 
 
     </string>
     <string name="btnBreeders">Breeders</string>
-    <string name="breeder_fragmnet">Breeder fragmnet</string>
+    <string name="breeder_fragmnet">Breeder</string>
     <string name="Review">Reviews</string>
 </resources>

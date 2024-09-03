@@ -1,6 +1,8 @@
 package hr.algebra.pawprotectormobile
 
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -10,12 +12,16 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import hr.algebra.pawprotectormobile.databinding.ActivityMainBinding
+import java.util.Locale
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var tts: TextToSpeech
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -25,15 +31,39 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        tts = TextToSpeech(this, this)
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            readTextAloud()
+            Snackbar.make(view, "Reading text from screen", Snackbar.LENGTH_LONG)
                 .setAnchorView(R.id.fab)
                 .setAction("Action", null).show()
+        }
+    }
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            // Set the language to Croatian
+            val result = tts.setLanguage(Locale("hr", "HR"))
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "Croatian language is not supported!")
+            }
+        } else {
+            Log.e("TTS", "Initialization Failed!")
+        }
+    }
+    private fun readTextAloud() {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.FirstFragment)
+
+        val textToRead = currentFragment?.view?.findViewById<TextView>(R.id.FirstFragment)?.text.toString()
+
+        if (textToRead.isNotEmpty()) {
+            tts.speak(textToRead, TextToSpeech.QUEUE_FLUSH, null, "")
+        } else {
+            Snackbar.make(findViewById(R.id.fab), "No text to read", Snackbar.LENGTH_SHORT).show()
         }
     }
 
