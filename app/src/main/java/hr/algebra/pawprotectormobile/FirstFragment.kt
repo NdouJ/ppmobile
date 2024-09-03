@@ -116,7 +116,7 @@ class FirstFragment : Fragment() {
 
     private fun updateRecyclerView() {
         lifecycleScope.launch(Dispatchers.Main) {
-            adapter.notifyDataSetChanged() // Notify adapter of data changes
+            adapter.notifyDataSetChanged()
         }
     }
 

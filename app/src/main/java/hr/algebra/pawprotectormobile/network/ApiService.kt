@@ -2,6 +2,7 @@ package hr.algebra.pawprotectormobile.network
 
 import hr.algebra.pawprotectormobile.model.Breeder
 import hr.algebra.pawprotectormobile.model.Dog
+import hr.algebra.pawprotectormobile.model.Review
 import hr.algebra.pawprotectormobile.model.TokenResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -24,4 +25,10 @@ interface ApiService {
         @Query("dog") breedName: String,
         @Header("Authorization") token: String
     ): Response<List<Breeder>>
+
+    @GET("api/UserReview/GetUserReviewByBreederId")
+    suspend fun getUserReview(
+        @Query("Id") breedName: String,
+        @Header("Authorization") token: String
+    ): Response<List<Review>>
 }

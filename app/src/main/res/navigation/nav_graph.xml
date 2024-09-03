@@ -39,6 +39,14 @@
         android:name="hr.algebra.pawprotectormobile.BreederFragment"
         android:label="@string/breeder_fragmnet"
         tools:layout="@layout/fragmnent_breeder">
-        <!-- No additional actions needed in BreederFragment for this setup -->
+        <action
+            android:id="@+id/action_BreederFragment_to_ReviewFragment"
+            app:destination="@id/ReviewFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ReviewFragment"
+        android:name="hr.algebra.pawprotectormobile.ReviewFragment"
+        android:label="@string/Review"
+        tools:layout="@layout/fragment_review">
     </fragment>
 </navigation>

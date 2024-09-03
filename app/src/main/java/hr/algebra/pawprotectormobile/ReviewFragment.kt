@@ -12,34 +12,34 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import hr.algebra.pawprotectormobile.databinding.FragmentSecondBinding
+import hr.algebra.pawprotectormobile.databinding.FragmentReviewBinding
 import hr.algebra.pawprotectormobile.databinding.FragmnentBreederBinding
-import hr.algebra.pawprotectormobile.model.Dog
-import hr.algebra.pawprotectormobile.ui.BreederAdapter
-import hr.algebra.pawprotectormobile.ui.DogAdapter
-import hr.algebra.pawprotectormobile.ui.SharedViewModel
 import hr.algebra.pawprotectormobile.model.Breeder
+import hr.algebra.pawprotectormobile.model.Review
+import hr.algebra.pawprotectormobile.ui.BreederAdapter
+import hr.algebra.pawprotectormobile.ui.ReviewAdapter
+import hr.algebra.pawprotectormobile.ui.SharedViewModel
 import hr.algebra.pawprotectormobile.utils.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-class BreederFragment : Fragment() {
+class ReviewFragment: Fragment() {
     private lateinit var viewModel: SharedViewModel
     private var token: String? = null  // Change to nullable
-    private var breedName: String = ""
-    private var _binding: FragmnentBreederBinding? = null
+    private var breederId: String = ""
+    private var _binding: FragmentReviewBinding? = null
     private val binding get() = _binding!!
-    private lateinit var breederAdapter: BreederAdapter
-    private var breederList: MutableList<Breeder> = mutableListOf()
+    private lateinit var reviewAdapter: ReviewAdapter
+    private var reviewList: MutableList<Review> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        breedName = arguments?.getString("breed_name") ?: "AKITA"
-        _binding = FragmnentBreederBinding.inflate(inflater, container, false)
+        breederId = arguments?.getString("idBreeder") ?: "267"
+        _binding = FragmentReviewBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -48,35 +48,34 @@ class BreederFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         viewModel.sharedString.observe(viewLifecycleOwner, Observer { sharedString ->
             token = sharedString
-            // Fetch breeders after token is initialized
             if (token != null) {
-                fetchBreeders()
+                fetchReview()
             }
         })
 
-        binding.recyclerViewBreeder.layoutManager = LinearLayoutManager(context)
-        breederAdapter = BreederAdapter(breederList, object : BreederAdapter.OnItemClickListener {
-            override fun onItemClick(breeder: Breeder) {
-                openReviewFragment(breeder.idBreeder)
+        binding.recyclerViewReview.layoutManager = LinearLayoutManager(context)
+        reviewAdapter = ReviewAdapter(reviewList, object : ReviewAdapter.OnItemClickListener {
+            override fun onItemClick(review: Review) {
+               // openReviewFragment(breeder.idBreeder)
             }
         })
-        binding.recyclerViewBreeder.adapter = breederAdapter
+        binding.recyclerViewReview.adapter = reviewAdapter
     }
 
-    private fun fetchBreeders() {
+    private fun fetchReview() {
         token?.let {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val response = RetrofitInstance.api.getBreederOfDog(breedName, "Bearer $it")
+                    val response = RetrofitInstance.api.getUserReview(breederId, "Bearer $it")
                     if (response.isSuccessful) {
-                        val breeders = response.body() ?: emptyList()
-                        Log.d("FetchDogs", "Fetched dogs: $breeders")
-                        breederList.clear()
-                        breederList.addAll(breeders)
+                        val reviews = response.body() ?: emptyList()
+                        Log.d("FetchReview", "Fetched review: $reviews")
+                        reviewList.clear()
+                        reviewList.addAll(reviews)
                         updateRecyclerView()
                     } else {
-                        Log.e("FetchBreeders", "Failed to fetch breeders: ${response.code()}")
-                        showToast("Failed to fetch breeders: ${response.code()}")
+                        Log.e("FetchReviews", "Failed to fetch reviews: ${response.code()}")
+                        showToast("Failed to fetch reviews: ${response.code()}")
                     }
                 } catch (e: IOException) {
                     showToast("Network error: ${e.localizedMessage}")
@@ -91,7 +90,7 @@ class BreederFragment : Fragment() {
 
     private fun updateRecyclerView() {
         lifecycleScope.launch(Dispatchers.Main) {
-            breederAdapter.notifyDataSetChanged()
+            reviewAdapter.notifyDataSetChanged()
         }
     }
 
@@ -100,15 +99,8 @@ class BreederFragment : Fragment() {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
-    private fun openReviewFragment(idBreeder: String) {
-        val bundle = Bundle().apply {
-            putString("idBreeder", idBreeder )
-        }
-        findNavController().navigate(R.id.action_BreederFragment_to_ReviewFragment, bundle)
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
-
